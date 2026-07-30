@@ -1,0 +1,45 @@
+name: qrver-vk-quiz-robot
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: qrver-vk-quiz-robot
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=production
+            - VK_TOKEN=${VK_TOKEN:?VK_TOKEN is required}
+            - ACTIVATION_PASSWORD=${ACTIVATION_PASSWORD:?ACTIVATION_PASSWORD is required}
+            - QUIZ_ENABLED=${QUIZ_ENABLED:-false}
+            - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-qrver_vk_quiz_robot}?schema=public
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - app-network
+
+    postgres:
+        image: postgres:16-alpine
+        container_name: qrver-vk-quiz-robot-postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-qrver_vk_quiz_robot}
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-qrver_vk_quiz_robot}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    postgres_data:

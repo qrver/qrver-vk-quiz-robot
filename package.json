@@ -1,0 +1,31 @@
+{
+    "name": "qrver-vk-quiz-robot",
+    "version": "1.0.0",
+    "description": "Конфигурируемый VK-бот для викторин и регистрации участников",
+    "license": "SEE LICENSE IN LICENSE",
+    "author": "qrver",
+    "type": "module",
+    "main": "index.ts",
+    "scripts": {
+        "build": "tsup index.ts",
+        "start": "prisma migrate deploy && node dist/index.cjs",
+        "dev": "prisma migrate deploy && tsx watch index.ts",
+        "db:generate": "prisma generate",
+        "db:studio": "prisma studio",
+        "db:push": "prisma db push",
+        "db:migrate:reset": "prisma migrate reset"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.14.0",
+        "dotenv": "^17.2.1",
+        "vk-io": "^4.9.1"
+    },
+    "devDependencies": {
+        "@types/node": "^24.3.0",
+        "prisma": "^6.14.0",
+        "tslib": "^2.8.1",
+        "tsup": "^8.5.0",
+        "tsx": "^4.20.4",
+        "typescript": "^5.9.2"
+    }
+}

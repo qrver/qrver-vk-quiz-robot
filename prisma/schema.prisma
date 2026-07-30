@@ -1,0 +1,75 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Сессии пользователей (заменяет Redis)
+model UserSession {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Данные пользователя
+    userId Int    @unique @map("user_id")
+    state  String @default("NOT_ACTIVATED")
+
+    // Ответы на вопросы
+    answer1 String? @map("answer_1")
+    answer2 String? @map("answer_2")
+    answer3 String? @map("answer_3")
+    answer4 String? @map("answer_4")
+    answer5 String? @map("answer_5")
+
+    // Данные регистрации
+    registrationName      String? @map("registration_name")
+    registrationCity      String? @map("registration_city")
+    registrationCompany   String? @map("registration_company")
+    registrationWorkplace String? @map("registration_workplace")
+
+    // Связи
+    quizAnswers      QuizAnswer[]
+    userRegistration UserRegistration?
+
+    @@map("user_sessions")
+}
+
+// Ответы на вопросы квиза
+model QuizAnswer {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    userId         Int    @map("user_id")
+    questionNumber Int    @map("question_number")
+    answer         String
+
+    // Связи
+    userSession UserSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+    @@unique([userId, questionNumber])
+    @@index([userId])
+    @@index([questionNumber])
+    @@map("quiz_answers")
+}
+
+// Регистрация пользователей
+model UserRegistration {
+    id        Int      @id @default(autoincrement())
+    userId    Int      @unique @map("user_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    name      String
+    city      String
+    company   String
+    workplace String
+
+    // Связи
+    userSession UserSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+    @@map("user_registrations")
+}
